@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Representa una escopeta de combate en CS2 (ej. Nova, XM1014, MAG-7, Sawed-Off).
  * Hereda de ArmaDeFuego e incorpora la dispersión múltiple mediante perdigones por disparo.

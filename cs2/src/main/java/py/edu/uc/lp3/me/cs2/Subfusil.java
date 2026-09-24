@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Representa un subfusil (SMG) en CS2 (ej. MP9, MAC-10, MP7, MP5-SD, P90, PP-Bizon).
  * Hereda de ArmaDeFuego e incorpora una alta cadencia de disparo (RPM).

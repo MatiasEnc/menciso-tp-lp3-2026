@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Representa una granada o artefacto arrojadizo en CS2.
  * Hereda de Arma e implementa mecánicas de lanzamiento y detonación con diversos efectos tácticos.

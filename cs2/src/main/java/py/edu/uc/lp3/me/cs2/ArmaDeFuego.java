@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Clase abstracta que representa todas las armas de fuego en CS2.
  * Hereda de Arma e incorpora la gestión de balística, cargador y recarga.

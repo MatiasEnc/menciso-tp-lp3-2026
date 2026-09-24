@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Representa rifles de francotirador de precisión en CS2 (ej. AWP, SSG 08, SCAR-20, G3SG1).
  * Hereda de ArmaDeFuego e incorpora la gestión de niveles de zoom en mira óptica.

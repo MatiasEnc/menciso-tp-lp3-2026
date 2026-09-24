@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Representa un rifle de asalto en CS2 (ej. AK-47, M4A4, M4A1-S, AUG, SG 553).
  * Hereda de ArmaDeFuego e incorpora la posibilidad de poseer mira telescópica/óptica.

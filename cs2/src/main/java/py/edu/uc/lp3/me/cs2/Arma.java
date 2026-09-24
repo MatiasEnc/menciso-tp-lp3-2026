@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Clase base abstracta que modela cualquier tipo de arma en Counter-Strike 2.
  */

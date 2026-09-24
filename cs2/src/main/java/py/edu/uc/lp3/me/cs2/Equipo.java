@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Representa la afiliación o bando al que pertenece un arma en CS2.
  */

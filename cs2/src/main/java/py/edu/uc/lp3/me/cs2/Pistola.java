@@ -1,3 +1,5 @@
+package py.edu.uc.lp3.me.cs2;
+
 /**
  * Representa las armas de fuego secundarias tipo Pistola en CS2 (ej. USP-S, Glock-18, Desert Eagle).
  * Hereda de ArmaDeFuego e incorpora la posibilidad de silenciador.
