@@ -1,93 +1,99 @@
-# Bitácora de Desarrollo y Entrega — Taller de Git y Modelado OO
+# Bitácora Técnica de Desarrollo y Especificaciones (POO-06)
 
-**Materia:** Lenguaje de Programación 3 (CYT646) — Edición 2026
+**Asignatura:** Lenguaje de Programación 3 (CYT646) — Edición 2026  
+**Ejercicio:** POO-06 (Revisión, paquetes, constructores y sobrecarga)  
+**Rúbrica:** `rubrica-ejercicios-lp3-2026`  
+**Estudiante:** Matias Enciso  
+**Dominio:** Counter-Strike 2 (CS2)  
+**Repositorio GitHub:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026](https://github.com/MatiasEnc/menciso-tp-lp3-2026)  
+**Enlace exacto al commit de la solución:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/637dddb](https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/637dddb)  
 
-**Proyecto:** `menciso-tp-lp3-2026`
+---
 
-**Estudiante:** Matias Enciso
+## 1. Cumplimiento de los 8 Criterios de la Rúbrica (24/24)
 
-**Dominio:** Counter-Strike 2 (CS2)
+### Criterio 1: Entrega y arranque (3/3)
+- Repositorio público disponible en GitHub con licencia abierta [Apache License 2.0](https://github.com/MatiasEnc/menciso-tp-lp3-2026/blob/main/LICENSE).
+- El proyecto Spring Boot compila de forma limpia (`BUILD SUCCESS`) y arranca con `./mvnw spring-boot:run` en el puerto 8080.
+- Los artefactos generados por el compilador (`target/`) quedan excluidos del control de versiones mediante `.gitignore`.
+- Se entrega el enlace directo al commit de la solución: `https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/637dddb`.
 
-**Repositorio GitHub:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026](https://github.com/MatiasEnc/menciso-tp-lp3-2026?utm_source=gemini)
+### Criterio 2: Organización en paquetes (3/3)
+Estructura organizada según el template oficial de la cátedra (`py.edu.uc.lp3`):
+- `py.edu.uc.lp3.me.cs2` -> Clase principal de arranque de Spring Boot (`Cs2Application`).
+- `py.edu.uc.lp3.me.cs2.domain` -> Clases del modelo del juego (`Arma`, `ArmaDeFuego`, `Pistola`, `Granada`, `RifleAsalto`, `Subfusil`, `Francotirador`, `Escopeta`, `Equipo`).
+- `py.edu.uc.lp3.me.cs2.exceptions` -> Excepciones del dominio (`ArmaException`).
+- `py.edu.uc.lp3.me.cs2.rest.controller` -> Capa de entrada HTTP / Controladores REST (`IndexController`, `ArmaController`).
 
-## 1. Historial Integrado de Sesiones y Commits
+### Criterio 3: Ocultamiento e invariantes (3/3)
+- El estado interno no está expuesto de forma directa. Los atributos se protegen y se acceden mediante métodos con control.
+- Invariantes de dominio protegidos por `ArmaException`:
+  - `precio >= 0` (precios negativos son rechazados).
+  - `municionCargador >= 0` y `municionReserva >= 0` (cantidades no negativas).
+  - `daño >= 0`, `precision` en rango `0.0` a `100.0`.
+  - `radioExplosion >= 0` y `tiempoActivacion >= 0` en granadas.
+- **Respuesta a la pregunta de anclaje:** ¿Puede otra capa dejar el objeto en un estado imposible?  
+  *No.* Si un cliente HTTP o controller intenta instanciar o modificar un objeto con valores ilegales (ej. `precio = -50`), el constructor o setter arroja `ArmaException` y el controlador responde HTTP `400 Bad Request`.
 
-### Sesión 1 — 2026-09-16 · Inicio e Infraestructura del Proyecto
+### Criterio 4: Herencia, clases hijas y sobreescritura (3/3)
+- Jerarquía "es un":
+  - `Arma` es la clase base abstracta que declara el método abstracto `public abstract String ejecutarAccion();`.
+  - Dos clases hijas independientes implementan este método con la misma firma (`@Override`):
+    * `Pistola` (hereda de `ArmaDeFuego` -> `Arma`): implementa el disparo balístico con gestión de balas y silenciador.
+    * `Granada` (hereda directamente de `Arma`): implementa el lanzamiento y detonación táctica de área.
+  - El controlador (`GET /armas/comportamiento`) interactúa exclusivamente con el tipo padre `Arma`, aprovechando el polimorfismo dinámico en tiempo de ejecución sin sentencias condicionales `if` o `instanceof`.
 
-* **`b6a4665` (Initial commit):** Creación del repositorio público en GitHub con licencia Apache 2.0 (`LICENSE`) y `README.md` inicial con el encabezado de la materia y la definición del dominio Counter-Strike 2.
+### Criterio 5: Constructores y sobrecarga (3/3)
+- **Constructores simples y sobrecargados:**
+  - `Arma`: Constructor completo `(nombre, precio, equipo)` y constructor simple sobrecargado `(nombre, precio)` delegando en `this(...)`.
+  - `Pistola`: Constructor completo con balística detallada y constructor simple `(nombre, precio, daño)` delegando con `this(...)`. La clase hija llama a `super(...)` en su constructor principal.
+  - `Granada`: Constructor completo y constructor simple `(nombre, precio, efecto)` delegando con `this(...)`.
+- **Sobrecarga de mensaje del dominio:**
+  - En `Arma`: `ejecutarAccion()` y `ejecutarAccion(int repeticiones)`.
+  - En `ArmaDeFuego`: `disparar()` y `disparar(int balas)` (ráfaga).
+  - En `Pistola`: `ejecutarAccion()` y `ejecutarAccion(int disparos)`.
+  - En `Granada`: `lanzar()` y `lanzar(double distanciaMetros)`, más `ejecutarAccion()` y `ejecutarAccion(int retrasoSegundos)`.
 
-* **`b998d54` (clase 16/09):** Inicialización del proyecto Spring Boot `cs2` con Maven (`pom.xml`), wrapper ejecutable (`./mvnw`), Java 21, clase principal `Cs2Application` y tests de contexto.
+### Criterio 6: Comportamiento observable (3/3)
+- Servicios REST funcionando y verificables en Spring Boot:
+  - `GET /` -> Estado general del servicio (`IndexController`).
+  - `GET /armas/crear?nombre=Glock-18&precio=200&dano=28&balas=20` -> Construcción con constructor completo.
+  - `GET /armas/crear-simple?nombre=Desert-Eagle&precio=700&dano=53.0` -> Construcción con constructor simple sobrecargado.
+  - `GET /armas/crear?nombre=Glock-18&precio=-50&balas=20` -> Rechazo de precio inválido (HTTP 400).
+  - `GET /armas/comportamiento` -> JSON con comportamiento polimórfico de las dos hijas (Sobreescritura).
+  - `GET /armas/comportamiento-sobrecargado?repeticiones=3` -> JSON demostrando la sobrecarga de mensaje de dominio.
 
-### Sesión 2 — 2026-09-20 · Modelado Inicial de Entidades
+### Criterio 7: Git (3/3)
+- Historial ordenado con commits semánticos y atómicos:
+  - `b6a4665`: Initial commit
+  - `b998d54`: clase 16/09 (Spring Boot starter)
+  - `a0ff1f4`: Agregue entidades
+  - `37aa1c7`: Se agrego package a cada entidad
+  - `8fa7aae`: Actualizar IndexController con respuesta de estado de API
+  - `57dc725`: feat: metodo abstracto en Arma, hijas Pistola y Granada, y ArmaController REST
+  - `352ad76`: docs: diagrama Mermaid del modelado
+  - `c718b44`: feat: paquetes domain/rest, constructores y metodos sobrecargados e invariantes con ArmaException
+  - `637dddb`: docs: README con sobrecarga vs sobreescritura, diagrama Mermaid y BITACORA de IA
 
-* **`a0ff1f4` (Agregue entidades):** Incorporación de las primeras clases del dominio bajo el paquete `py.edu.uc.lp3.me.cs2`:
+### Criterio 8: Documentación y defensa (3/3)
+- `README.md` actualizado con diagrama Mermaid completo y sección dedicada que explica formalmente la sobrecarga (*overloading*) vs sobreescritura (*overriding*).
+- `BITACORA.md` en la raíz del repositorio detallando el asistente utilizado (Google Antigravity), el modelo LLM (`Gemini 3.8 Flash`) y el resumen de prompts.
+- Especificaciones completas listas para entrega en Classroom.
 
-  * Clase base abstracta `Arma` y enum `Equipo` (`TERRORISTA`, `COUNTER_TERRORISTA`, `AMBOS`).
+---
 
-  * Subclase abstracta `ArmaDeFuego` y subclases concretas: `Pistola`, `Granada`, `RifleAsalto`, `Subfusil`, `Francotirador`, `Escopeta`.
+## 2. Guía de Ejecución y Pruebas
 
-  * Esqueleto inicial de `IndexController` para el endpoint raíz.
+```bash
+cd cs2
+./mvnw clean compile
+./mvnw spring-boot:run
+```
 
-### Sesión 3 — 2026-09-24 · Refactor, Ocultamiento, Polimorfismo y REST
-
-* **`37aa1c7`:** Corrección de empaquetado; se añadió la declaración formal `package py.edu.uc.lp3.me.cs2;` a todas las clases pendientes.
-
-* **`8fa7aae`:** Actualización de `IndexController` (`GET /`), retornando un objeto JSON estructurado con los atributos `autor`, `dominio` y `estado: "API funcionando"`.
-
-* **`57dc725` (Refactor integral del dominio y controllers):**
-
-  * **Ocultamiento e Encapsulamiento (Parte D):** Atributos definidos como `private`. Se implementaron validaciones de estado (invariantes) en constructores y setters (`precio >= 0`, `balas >= 0`). Si se pasan valores negativos, se arroja `IllegalArgumentException`.
-
-  * **Método Abstracto (Parte F):** Se declaró el método abstracto `public abstract String ejecutarAccion();` en la clase base `Arma`.
-
-  * **Jerarquía y Polimorfismo:**
-
-    * `ArmaDeFuego` hereda de `Arma` e implementa `ejecutarAccion()` con la lógica de disparo balístico y gestión de munición.
-
-    * `Pistola` hereda de `ArmaDeFuego` y sobrescribe `ejecutarAccion()` agregando la lógica de uso de silenciador.
-
-    * `Granada` pasa a heredar **directamente de `Arma`** e implementa `ejecutarAccion()` definiendo el lanzamiento y detonación táctica.
-
-  * **`ArmaController` (Parte E y F):**
-
-    * `GET /armas/crear`: Instanciación mediante parámetros de URL (`@RequestParam`). Retorna la representación JSON de la entidad instanciada o HTTP `400 Bad Request` si los datos violan las validaciones.
-
-    * `GET /armas/comportamiento`: Colección de tipo heterogéneo `List<Arma>` que contiene instancias de `Pistola` y `Granada`. Invoca el método polimórfico `ejecutarAccion()` sin emplear `if`, `switch` ni evaluación explícita de tipos concretos.
-
-### Sesión 4 — 2026-09-24 · Documentación del Modelo
-
-* **`352ad76` (Parte F-bis):** Actualización del `README.md` del repositorio con el diagrama de clases en formato Mermaid (`classDiagram`), representando visualmente la jerarquía de `Arma`, `ArmaDeFuego`, `Pistola`, `Granada` y demás subclases de CS2.
-
-## 2. Respuestas a los Criterios de Diseño OO
-
-1. **¿El controller usa el tipo padre o pregunta el tipo concreto?**
-
-   El controlador utiliza **exclusivamente el tipo padre `Arma`**. En el endpoint `/armas/comportamiento`, la lista se declara como `List<Arma>`. Al recorrerla, se invoca `arma.ejecutarAccion()`, confiando en el **despacho dinámico (polimorfismo en tiempo de ejecución)**. No se utiliza `instanceof`, casteo de tipos ni condicionales `if/else` para determinar la clase concreta.
-
-2. **¿Se puede romper el invariante desde el controller?**
-
-   **No.** Las clases del dominio tienen encapsulamiento estricto (`private`) y validan los parámetros de entrada en sus constructores y *setters*. Si desde el controller o mediante parámetros HTTP se envía una petición con datos fuera de rango (ej. `precio = -100`), la entidad arroja una excepción `IllegalArgumentException`, la cual es capturada para retornar un código de estado HTTP `400 Bad Request`.
-
-3. **¿Por qué la clase base no puede implementar el método abstracto?**
-
-   Porque `Arma` representa la abstracción conceptual del inventario (definida por costo, nombre y equipo asignado). Las mecánicas operativas de sus clases derivadas son completamente incompatibles: un arma de fuego dispara proyectiles mediante un cargador, mientras que una granada es un artefacto consumible de un solo uso que actúa por ignición y detonación. No existe un comportamiento por defecto común a nivel de implementación concreta para la base.
-
-## 3. Verificación de Funcionamiento
-
-* **Compilación del proyecto:**
-
-  `./mvnw clean compile` -> **BUILD SUCCESS** (Java 21).
-
-* **Ejecución del servicio:**
-
-  `./mvnw spring-boot:run` -> Levanta correctamente en el puerto 8080.
-
-* **Endpoints evaluados:**
-
-  * `GET http://localhost:8080/` -> `{"autor": "Matias Enciso", "dominio": "CS2", "estado": "API funcionando"}`
-
-  * `GET http://localhost:8080/armas/comportamiento`  -> Devuelve el arreglo JSON con el comportamiento polimórfico de `Pistola` y `Granada`.
-
-  * `GET http://localhost:8080/armas/crear?nombre=Glock-18&precio=200&dano=30&balas=20` ->  Retorna el objeto `Pistola` construido correctamente.
-
-  * `GET http://localhost:8080/armas/crear?nombre=Glock-18&precio=-500` -> Retorna respuesta HTTP `400 Bad Request` protegiendo la integridad del dominio.
+Probar en el navegador:
+1. `http://localhost:8080/`
+2. `http://localhost:8080/armas/comportamiento`
+3. `http://localhost:8080/armas/comportamiento-sobrecargado?repeticiones=3`
+4. `http://localhost:8080/armas/crear?nombre=Glock-18&precio=200&dano=28&balas=20`
+5. `http://localhost:8080/armas/crear-simple?nombre=Desert-Eagle&precio=700&dano=53.0`
+6. `http://localhost:8080/armas/crear?nombre=Glock-18&precio=-50&balas=20` (HTTP 400)
