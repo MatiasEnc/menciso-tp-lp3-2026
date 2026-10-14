@@ -14,11 +14,12 @@ public abstract class ArmaDeFuego extends Arma {
     protected int capacidadCargador;
 
     /**
-     * Constructor completo.
+     * Constructor completo con multimedia.
      */
     public ArmaDeFuego(String nombre, int precio, Equipo equipo, double daño, double precision,
-                       int municionCargador, int municionReserva, double tiempoRecarga) {
-        super(nombre, precio, equipo);
+                       int municionCargador, int municionReserva, double tiempoRecarga,
+                       String imagen, String sonido) {
+        super(nombre, precio, equipo, imagen, sonido);
         if (daño < 0) {
             throw new ArmaException("El daño no puede ser negativo");
         }
@@ -37,10 +38,20 @@ public abstract class ArmaDeFuego extends Arma {
     }
 
     /**
+     * Constructor completo con recursos multimedia por defecto.
+     */
+    public ArmaDeFuego(String nombre, int precio, Equipo equipo, double daño, double precision,
+                       int municionCargador, int municionReserva, double tiempoRecarga) {
+        this(nombre, precio, equipo, daño, precision, municionCargador, municionReserva, tiempoRecarga,
+             "firearm.png", "gunshot.wav");
+    }
+
+    /**
      * Constructor simple sobrecargado con valores por defecto.
      */
     public ArmaDeFuego(String nombre, int precio, double daño, int municionCargador) {
-        this(nombre, precio, Equipo.AMBOS, daño, 75.0, municionCargador, municionCargador * 3, 2.2);
+        this(nombre, precio, Equipo.AMBOS, daño, 75.0, municionCargador, municionCargador * 3, 2.2,
+             "firearm.png", "gunshot.wav");
     }
 
     public void disparar() {
@@ -78,15 +89,15 @@ public abstract class ArmaDeFuego extends Arma {
         }
         if (municionCargador >= repeticiones) {
             disparar(repeticiones);
-            return String.format("[%s] Disparo efectuado (%d bala(s)). Daño base: %.1f | Balas restantes: %d/%d",
-                    nombre, repeticiones, daño, municionCargador, capacidadCargador);
+            return String.format("[%s] Disparo efectuado (%d bala(s)). Daño base: %.1f | Balas restantes: %d/%d | Sonido: %s",
+                    nombre, repeticiones, daño, municionCargador, capacidadCargador, sonido);
         } else if (municionCargador > 0) {
             int gastadas = municionCargador;
             disparar(gastadas);
-            return String.format("[%s] Ráfaga parcial de %d bala(s) (cargador agotado). Balas restantes: 0/%d",
-                    nombre, gastadas, capacidadCargador);
+            return String.format("[%s] Ráfaga parcial de %d bala(s) (cargador agotado). Balas restantes: 0/%d | Sonido: %s",
+                    nombre, gastadas, capacidadCargador, sonido);
         } else {
-            return String.format("[%s] *Click* Sin munición en el cargador. ¡Necesita recargar!", nombre);
+            return String.format("[%s] *Click* Sin munición en el cargador. ¡Necesita recargar! | Sonido: empty_click.wav", nombre);
         }
     }
 

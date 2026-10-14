@@ -4,16 +4,19 @@ import py.edu.uc.lp3.me.cs2.exceptions.ArmaException;
 
 /**
  * Clase base abstracta que modela cualquier tipo de arma en Counter-Strike 2.
+ * Implementa la característica UI.Capable para representación multimedia (imagen y sonido).
  */
-public abstract class Arma {
+public abstract class Arma implements UI.Capable, UICapable {
     protected String nombre;
     protected int precio;
     protected Equipo equipo;
+    protected String imagen;
+    protected String sonido;
 
     /**
-     * Constructor completo.
+     * Constructor completo con multimedia.
      */
-    public Arma(String nombre, int precio, Equipo equipo) {
+    public Arma(String nombre, int precio, Equipo equipo, String imagen, String sonido) {
         if (nombre == null || nombre.isBlank()) {
             throw new ArmaException("El nombre del arma no puede estar vacío");
         }
@@ -23,13 +26,22 @@ public abstract class Arma {
         this.nombre = nombre;
         this.precio = precio;
         this.equipo = (equipo != null) ? equipo : Equipo.AMBOS;
+        this.imagen = (imagen != null && !imagen.isBlank()) ? imagen : "default_weapon.png";
+        this.sonido = (sonido != null && !sonido.isBlank()) ? sonido : "default_sound.wav";
     }
 
     /**
-     * Constructor simple sobrecargado: asigna equipo AMBOS por defecto.
+     * Constructor completo con imagen y sonido por defecto.
+     */
+    public Arma(String nombre, int precio, Equipo equipo) {
+        this(nombre, precio, equipo, "default_weapon.png", "default_sound.wav");
+    }
+
+    /**
+     * Constructor simple sobrecargado: asigna equipo AMBOS e imagen/sonido por defecto.
      */
     public Arma(String nombre, int precio) {
-        this(nombre, precio, Equipo.AMBOS);
+        this(nombre, precio, Equipo.AMBOS, "default_weapon.png", "default_sound.wav");
     }
 
     /**
@@ -72,12 +84,34 @@ public abstract class Arma {
         this.equipo = (equipo != null) ? equipo : Equipo.AMBOS;
     }
 
+    @Override
+    public String getImagen() {
+        return imagen;
+    }
+
+    @Override
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
+    }
+
+    @Override
+    public String getSonido() {
+        return sonido;
+    }
+
+    @Override
+    public void setSonido(String sonido) {
+        this.sonido = sonido;
+    }
+
     public void mostrarInformacion() {
-        System.out.println("Arma: " + nombre + " | Precio: $" + precio + " | Equipo: " + equipo);
+        System.out.println("Arma: " + nombre + " | Precio: $" + precio + " | Equipo: " + equipo
+                + " | Imagen: " + imagen + " | Sonido: " + sonido);
     }
 
     @Override
     public String toString() {
-        return String.format("%s [Precio: $%d | Equipo: %s]", nombre, precio, equipo);
+        return String.format("%s [Precio: $%d | Equipo: %s | Imagen: %s | Sonido: %s]",
+                nombre, precio, equipo, imagen, sonido);
     }
 }

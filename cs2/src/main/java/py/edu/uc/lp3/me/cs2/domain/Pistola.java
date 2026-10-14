@@ -6,23 +6,36 @@ public class Pistola extends ArmaDeFuego {
     private boolean esSilenciada;
 
     /**
-     * Constructor completo.
+     * Constructor completo con multimedia.
      */
     public Pistola(String nombre, int precio, Equipo equipo, double daño, double precision,
-                   int municionCargador, int municionReserva, double tiempoRecarga, boolean esSilenciada) {
-        super(nombre, precio, equipo, daño, precision, municionCargador, municionReserva, tiempoRecarga);
+                   int municionCargador, int municionReserva, double tiempoRecarga, boolean esSilenciada,
+                   String imagen, String sonido) {
+        super(nombre, precio, equipo, daño, precision, municionCargador, municionReserva, tiempoRecarga, imagen, sonido);
         this.esSilenciada = esSilenciada;
     }
 
     /**
-     * Constructor simple sobrecargado: crea una pistola con valores estándar.
+     * Constructor completo con imagen y sonido automáticos según silenciador.
+     */
+    public Pistola(String nombre, int precio, Equipo equipo, double daño, double precision,
+                   int municionCargador, int municionReserva, double tiempoRecarga, boolean esSilenciada) {
+        this(nombre, precio, equipo, daño, precision, municionCargador, municionReserva, tiempoRecarga, esSilenciada,
+             esSilenciada ? "usp_s.png" : "glock18.png",
+             esSilenciada ? "pistol_silenced.wav" : "pistol_shot.wav");
+    }
+
+    /**
+     * Constructor simple sobrecargado: crea una pistola con valores estándar y multimedia.
      */
     public Pistola(String nombre, int precio, double daño) {
-        this(nombre, precio, Equipo.AMBOS, daño, 75.0, 12, 24, 2.2, false);
+        this(nombre, precio, Equipo.AMBOS, daño, 75.0, 12, 24, 2.2, false, "glock18.png", "pistol_shot.wav");
     }
 
     public void alternarSilenciador() {
         this.esSilenciada = !this.esSilenciada;
+        this.sonido = this.esSilenciada ? "pistol_silenced.wav" : "pistol_shot.wav";
+        this.imagen = this.esSilenciada ? "usp_s_silenced.png" : "usp_s.png";
     }
 
     /**
@@ -45,10 +58,10 @@ public class Pistola extends ArmaDeFuego {
             int efectuados = Math.min(disparos, municionCargador);
             municionCargador -= efectuados;
             String modo = esSilenciada ? "Disparo silenciado con sigilo (*Pffft*)" : "Disparo de pistola estándar (¡PUM!)";
-            return String.format("[%s] %s (%d tiro(s)). Daño: %.1f | Balas restantes: %d/%d",
-                    nombre, modo, efectuados, daño, municionCargador, capacidadCargador);
+            return String.format("[%s] %s (%d tiro(s)). Daño: %.1f | Balas restantes: %d/%d | Sonido: %s",
+                    nombre, modo, efectuados, daño, municionCargador, capacidadCargador, sonido);
         } else {
-            return String.format("[%s] *Click* Sin munición en el cargador. ¡Necesita recargar!", nombre);
+            return String.format("[%s] *Click* Sin munición en el cargador. ¡Necesita recargar! | Sonido: empty_click.wav", nombre);
         }
     }
 

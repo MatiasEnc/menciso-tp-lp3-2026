@@ -14,11 +14,22 @@ El siguiente diagrama refleja la jerarquía y estructura de clases bajo el paque
 
 ```mermaid
 classDiagram
+    class UICapable {
+        <<interface>>
+        +getImagen()* String
+        +setImagen(imagen)* void
+        +getSonido()* String
+        +setSonido(sonido)* void
+    }
+
     class Arma {
         <<abstract>>
         #String nombre
         #int precio
         #Equipo equipo
+        #String imagen
+        #String sonido
+        +Arma(nombre, precio, equipo, imagen, sonido)
         +Arma(nombre, precio, equipo)
         +Arma(nombre, precio)
         +ejecutarAccion()* String
@@ -29,6 +40,10 @@ classDiagram
         +setPrecio(precio) void
         +getEquipo() Equipo
         +setEquipo(equipo) void
+        +getImagen() String
+        +setImagen(imagen) void
+        +getSonido() String
+        +setSonido(sonido) void
         +mostrarInformacion() void
     }
 
@@ -48,6 +63,7 @@ classDiagram
         #int municionReserva
         #double tiempoRecarga
         #int capacidadCargador
+        +ArmaDeFuego(nombre, precio, equipo, daño, precision, cargador, reserva, recarga, imagen, sonido)
         +ArmaDeFuego(nombre, precio, equipo, daño, precision, cargador, reserva, recarga)
         +ArmaDeFuego(nombre, precio, daño, cargador)
         +disparar() void
@@ -59,6 +75,7 @@ classDiagram
 
     class Pistola {
         -boolean esSilenciada
+        +Pistola(nombre, precio, equipo, daño, precision, cargador, reserva, recarga, silenciada, imagen, sonido)
         +Pistola(nombre, precio, equipo, daño, precision, cargador, reserva, recarga, silenciada)
         +Pistola(nombre, precio, daño)
         +alternarSilenciador() void
@@ -74,6 +91,7 @@ classDiagram
         -boolean esLetal
         -String efecto
         -boolean lanzada
+        +Granada(nombre, precio, equipo, daño, radio, tiempo, esLetal, efecto, imagen, sonido)
         +Granada(nombre, precio, equipo, daño, radio, tiempo, esLetal, efecto)
         +Granada(nombre, precio, efecto)
         +lanzar() void
@@ -83,15 +101,18 @@ classDiagram
     }
 
     class RifleAsalto {
+        +RifleAsalto(nombre, precio, equipo, daño, precision, cargador, reserva, recarga, imagen, sonido)
         +RifleAsalto(nombre, precio, equipo, daño, precision, cargador, reserva, recarga)
     }
 
     class Subfusil {
+        +Subfusil(nombre, precio, equipo, daño, precision, cargador, reserva, recarga, imagen, sonido)
         +Subfusil(nombre, precio, equipo, daño, precision, cargador, reserva, recarga)
     }
 
     class Francotirador {
         -boolean miraDesplegada
+        +Francotirador(nombre, precio, equipo, daño, precision, cargador, reserva, recarga, imagen, sonido)
         +Francotirador(nombre, precio, equipo, daño, precision, cargador, reserva, recarga)
         +alternarMira() void
         +isMiraDesplegada() boolean
@@ -99,6 +120,7 @@ classDiagram
 
     class Escopeta {
         -int perdigonesPorDisparo
+        +Escopeta(nombre, precio, equipo, daño, precision, cargador, reserva, recarga, perdigones, imagen, sonido)
         +Escopeta(nombre, precio, equipo, daño, precision, cargador, reserva, recarga, perdigones)
         +getPerdigonesPorDisparo() int
     }
@@ -107,6 +129,7 @@ classDiagram
         +ArmaException(message)
     }
 
+    UICapable <|.. Arma : implements
     Arma <|-- ArmaDeFuego
     Arma <|-- Granada
     ArmaDeFuego <|-- Pistola

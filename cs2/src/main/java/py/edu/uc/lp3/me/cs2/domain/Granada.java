@@ -11,11 +11,12 @@ public class Granada extends Arma {
     private boolean lanzada;
 
     /**
-     * Constructor completo.
+     * Constructor completo con multimedia.
      */
     public Granada(String nombre, int precio, Equipo equipo, double daño, double radioExplosion,
-                   double tiempoActivacion, boolean esLetal, String efecto) {
-        super(nombre, precio, equipo);
+                   double tiempoActivacion, boolean esLetal, String efecto,
+                   String imagen, String sonido) {
+        super(nombre, precio, equipo, imagen, sonido);
         if (radioExplosion < 0 || tiempoActivacion < 0) {
             throw new ArmaException("Los valores de radio y tiempo deben ser positivos");
         }
@@ -28,10 +29,20 @@ public class Granada extends Arma {
     }
 
     /**
+     * Constructor completo con imagen y sonido por defecto.
+     */
+    public Granada(String nombre, int precio, Equipo equipo, double daño, double radioExplosion,
+                   double tiempoActivacion, boolean esLetal, String efecto) {
+        this(nombre, precio, equipo, daño, radioExplosion, tiempoActivacion, esLetal, efecto,
+             "granada.png", "grenade_explosion.wav");
+    }
+
+    /**
      * Constructor simple sobrecargado: granada táctica por defecto.
      */
     public Granada(String nombre, int precio, String efecto) {
-        this(nombre, precio, Equipo.AMBOS, 0.0, 5.0, 1.5, false, efecto);
+        this(nombre, precio, Equipo.AMBOS, 0.0, 5.0, 1.5, false, efecto,
+             "granada_tactica.png", "flashbang_bang.wav");
     }
 
     public void lanzar() {
@@ -63,8 +74,8 @@ public class Granada extends Arma {
     public String ejecutarAccion(int retrasoSegundos) {
         lanzar();
         double tiempoFinal = Math.max(0.2, tiempoActivacion - retrasoSegundos);
-        return String.format("[%s] ¡Granada arrojada y detonada tras %.1fs! Efecto: %s (Radio: %.1fm, Letal: %s)",
-                nombre, tiempoFinal, efecto, radioExplosion, esLetal ? "Sí" : "No");
+        return String.format("[%s] ¡Granada arrojada y detonada tras %.1fs! Efecto: %s (Radio: %.1fm, Letal: %s) | Sonido: %s",
+                nombre, tiempoFinal, efecto, radioExplosion, esLetal ? "Sí" : "No", sonido);
     }
 
     public double getDaño() { return daño; }
