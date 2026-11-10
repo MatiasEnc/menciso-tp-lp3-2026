@@ -4,12 +4,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import py.edu.uc.lp3.me.cs2.domain.*;
 import py.edu.uc.lp3.me.cs2.exceptions.ArmaException;
+import py.edu.uc.lp3.me.cs2.repository.ArmaRepository;
+import py.edu.uc.lp3.me.cs2.repository.JugadorRepository;
 
 import java.util.*;
 
 @RestController
 @RequestMapping("/armas")
 public class ArmaController {
+
+    private final ArmaRepository armaRepository;
+    private final JugadorRepository jugadorRepository;
+
+    public ArmaController(ArmaRepository armaRepository, JugadorRepository jugadorRepository) {
+        this.armaRepository = armaRepository;
+        this.jugadorRepository = jugadorRepository;
+    }
 
     /**
      * Construcción completa por URL usando constructor principal.
@@ -77,15 +87,20 @@ public class ArmaController {
      */
     @GetMapping("/comportamiento")
     public ResponseEntity<List<Map<String, Object>>> obtenerComportamiento() {
-        List<Arma> arsenal = List.of(
-            new Pistola("USP-S", 200, Equipo.COUNTER_TERRORISTA, 35.0, 85.0, 12, 24, 2.2, true),
-            new Granada("Granada Flashbang", 200, Equipo.AMBOS, 0.0, 10.0, 1.5, false, "Ceguera temporal")
-        );
+        List<Arma> arsenal = armaRepository.findAll();
+        if (arsenal.isEmpty()) {
+            arsenal = List.of(
+                new Pistola("USP-S", 200, Equipo.COUNTER_TERRORISTA, 35.0, 85.0, 12, 24, 2.2, true),
+                new Granada("Granada Flashbang", 200, Equipo.AMBOS, 0.0, 10.0, 1.5, false, "Ceguera temporal")
+            );
+        }
 
         List<Map<String, Object>> respuesta = new ArrayList<>();
         for (Arma arma : arsenal) {
             Map<String, Object> item = new LinkedHashMap<>();
+            item.put("id", arma.getId());
             item.put("arma", arma.getNombre());
+            item.put("tipo", arma.getClass().getSimpleName());
             item.put("precio", arma.getPrecio());
             item.put("equipo", arma.getEquipo());
             item.put("imagen", arma.getImagen());
@@ -127,31 +142,31 @@ public class ArmaController {
     }
 
     /**
-     * Catálogo UI: muestra todas las clases de armas del dominio con su imagen y sonido.
+     * Catálogo UI (Consigna 3 - Interfaz del dominio):
+     * Devuelve elementos persistidos de dos familias distintas (Arma y Jugador)
+     * utilizando la interfaz común UICapable.
      * Ejemplo: GET /armas/catalogo-ui
      */
     @GetMapping("/catalogo-ui")
     public ResponseEntity<List<Map<String, Object>>> catalogoUI() {
-        List<Arma> catalogo = List.of(
-            new Pistola("Glock-18", 200, Equipo.TERRORISTA, 28.0, 75.0, 20, 60, 2.2, false),
-            new Pistola("USP-S", 200, Equipo.COUNTER_TERRORISTA, 35.0, 85.0, 12, 24, 2.2, true),
-            new RifleAsalto("AK-47", 2700, Equipo.TERRORISTA, 36.0, 77.0, 30, 90, 2.5),
-            new Subfusil("MP9", 1250, Equipo.COUNTER_TERRORISTA, 26.0, 70.0, 30, 120, 2.1),
-            new Francotirador("AWP", 4750, Equipo.AMBOS, 115.0, 99.0, 5, 30, 3.6),
-            new Escopeta("XM1014", 2000, Equipo.AMBOS, 20.0, 50.0, 7, 32, 2.8, 6),
-            new Granada("Granada Flashbang", 200, Equipo.AMBOS, 0.0, 10.0, 1.5, false, "Ceguera temporal"),
-            new Granada("Granada HE", 300, Equipo.AMBOS, 98.0, 8.0, 2.0, true, "Explosión fragmentaria")
-        );
+        List<UICapable> elementosUI = new ArrayList<>();
+        elementosUI.addAll(armaRepository.findAll());
+        elementosUI.addAll(jugadorRepository.findAll());
 
         List<Map<String, Object>> res = new ArrayList<>();
-        for (Arma a : catalogo) {
+        for (UICapable elemento : elementosUI) {
             Map<String, Object> m = new LinkedHashMap<>();
-            m.put("arma", a.getNombre());
-            m.put("precio", a.getPrecio());
-            m.put("equipo", a.getEquipo());
-            m.put("tipo", a.getClass().getSimpleName());
-            m.put("imagen", a.getImagen());
-            m.put("sonido", a.getSonido());
+            m.put("clase", elemento.getClass().getSimpleName());
+            m.put("jerarquia", (elemento instanceof Arma) ? "Familia Arma" : "Familia Jugador");
+            if (elemento instanceof Arma a) {
+                m.put("id", a.getId());
+                m.put("nombre", a.getNombre());
+            } else if (elemento instanceof Jugador j) {
+                m.put("id", j.getId());
+                m.put("nombre", j.getNombre());
+            }
+            m.put("imagen", elemento.getImagen());
+            m.put("sonido", elemento.getSonido());
             res.add(m);
         }
         return ResponseEntity.ok(res);
