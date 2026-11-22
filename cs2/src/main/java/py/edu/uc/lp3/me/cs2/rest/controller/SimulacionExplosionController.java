@@ -2,9 +2,6 @@ package py.edu.uc.lp3.me.cs2.rest.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import py.edu.uc.lp3.me.cs2.domain.Blindaje;
-import py.edu.uc.lp3.me.cs2.domain.Equipo;
-import py.edu.uc.lp3.me.cs2.domain.Granada;
 import py.edu.uc.lp3.me.cs2.domain.Jugador;
 import py.edu.uc.lp3.me.cs2.rest.dto.ResultadoSimulacion;
 import py.edu.uc.lp3.me.cs2.rest.dto.SimulacionExplosionRequest;
@@ -14,7 +11,8 @@ import java.util.List;
 
 /**
  * Controlador REST para la simulación persistida de combate y explosiones en Counter-Strike 2.
- * Expone las dos reglas de negocio que conectan tres clases del modelo: Arma (Granada/Pistola), Jugador y Blindaje.
+ * Respeta la arquitectura de 3 capas delegando la construcción, validación y reglas de negocio
+ * exclusivamente a SimulacionExplosionService.
  */
 @RestController
 @RequestMapping("/api/simulacion/explosion")
@@ -28,13 +26,11 @@ public class SimulacionExplosionController {
 
     /**
      * Endpoint POST que ejecuta la simulación y persiste el nuevo estado en H2.
-     * Acepta IDs de entidades persistidas (armaId, jugadorId, distanciaMetros, disparos) o entidades en línea.
      * POST /api/simulacion/explosion
      */
     @PostMapping
     public ResponseEntity<ResultadoSimulacion> simular(@RequestBody(required = false) SimulacionExplosionRequest request) {
-        SimulacionExplosionRequest req = (request != null) ? request : new SimulacionExplosionRequest();
-        ResultadoSimulacion resultado = simulacionService.simularImpactoPersistido(req);
+        ResultadoSimulacion resultado = simulacionService.simularImpactoPersistido(request);
         return ResponseEntity.ok(resultado);
     }
 
@@ -57,7 +53,7 @@ public class SimulacionExplosionController {
     }
 
     /**
-     * Endpoint GET interactivo con parámetros en URL para pruebas rápidas.
+     * Endpoint GET interactivo con parámetros en URL para pruebas de lectura (no muta H2).
      * Ejemplo: GET /api/simulacion/explosion?distancia=2.5&conBlindaje=true&fuegoAmigo=false
      */
     @GetMapping
@@ -65,27 +61,15 @@ public class SimulacionExplosionController {
             @RequestParam(defaultValue = "2.5") double distancia,
             @RequestParam(defaultValue = "true") boolean conBlindaje,
             @RequestParam(defaultValue = "false") boolean fuegoAmigo) {
-
-        Equipo equipoJugador = fuegoAmigo ? Equipo.TERRORISTA : Equipo.COUNTER_TERRORISTA;
-        Blindaje blindaje = conBlindaje ? new Blindaje("Chaleco Kevlar", 100.0, 50.0) : null;
-
-        Granada granada = new Granada("Granada HE", 300, Equipo.TERRORISTA, 98.0, 8.0, 2.0, true, "Explosión fragmentaria");
-        Jugador jugador = new Jugador("Player-Test", 100.0, equipoJugador, blindaje);
-
-        ResultadoSimulacion resultado = simulacionService.simularExplosion(granada, jugador, blindaje, distancia);
-        return ResponseEntity.ok(resultado);
+        return ResponseEntity.ok(simulacionService.simularConParametros(distancia, conBlindaje, fuegoAmigo));
     }
 
     /**
-     * Endpoint demostrativo preconfigurado listo para navegador (persiste el impacto en H2).
+     * Endpoint demostrativo de solo lectura listo para navegador (no modifica H2 en un GET).
      * GET /api/simulacion/explosion/demo
      */
     @GetMapping("/demo")
     public ResponseEntity<ResultadoSimulacion> demo() {
-        SimulacionExplosionRequest req = new SimulacionExplosionRequest();
-        req.setDistanciaMetros(2.0);
-        req.setDisparos(2);
-        ResultadoSimulacion resultado = simulacionService.simularImpactoPersistido(req);
-        return ResponseEntity.ok(resultado);
+        return ResponseEntity.ok(simulacionService.simularDemoLectura());
     }
 }

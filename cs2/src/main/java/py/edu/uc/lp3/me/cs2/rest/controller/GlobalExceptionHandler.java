@@ -1,21 +1,30 @@
-package py.edu.uc.lp3.me.cs2.exceptions;
+package py.edu.uc.lp3.me.cs2.rest.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import py.edu.uc.lp3.me.cs2.exceptions.ArmaException;
+import py.edu.uc.lp3.me.cs2.exceptions.MunicionInsuficienteException;
+import py.edu.uc.lp3.me.cs2.exceptions.ParametroInvalidoException;
+import py.edu.uc.lp3.me.cs2.exceptions.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Handler global de la capa de presentación REST que traduce la jerarquía de excepciones
+ * del dominio (ArmaException y sus hijas) a códigos de estado HTTP y cuerpos JSON distinguibles.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
      * Handler para la primera excepción hija: ParametroInvalidoException.
-     * Se dispara cuando se violan invariantes de construcción o atributos (ej. precios negativos).
+     * Se dispara cuando la capa service detecta violaciones de invariantes (ej. precios negativos
+     * o municionCargador > capacidadCargador).
      */
     @ExceptionHandler(ParametroInvalidoException.class)
     public ResponseEntity<Map<String, Object>> handleParametroInvalidoException(ParametroInvalidoException ex) {
@@ -75,7 +84,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Desempaqueta excepciones del dominio lanzadas desde setters/constructores durante la deserialización JSON de Jackson.
+     * Desempaqueta excepciones lanzadas durante la deserialización JSON de Jackson.
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleJsonException(HttpMessageNotReadableException ex) {

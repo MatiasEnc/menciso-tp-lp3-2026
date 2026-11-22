@@ -2,31 +2,34 @@ package py.edu.uc.lp3.me.cs2.rest.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import py.edu.uc.lp3.me.cs2.domain.*;
-import py.edu.uc.lp3.me.cs2.exceptions.ArmaException;
-import py.edu.uc.lp3.me.cs2.repository.ArmaRepository;
-import py.edu.uc.lp3.me.cs2.repository.JugadorRepository;
+import py.edu.uc.lp3.me.cs2.domain.Pistola;
+import py.edu.uc.lp3.me.cs2.service.ArmaService;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Controlador REST para endpoints de demostración de constructores, polimorfismo
+ * e interfaz UICapable. Respeta estrictamente la arquitectura de 3 capas delegando
+ * toda operación, validación y consulta a ArmaService.
+ */
 @RestController
 @RequestMapping("/armas")
 public class ArmaController {
 
-    private final ArmaRepository armaRepository;
-    private final JugadorRepository jugadorRepository;
+    private final ArmaService armaService;
 
-    public ArmaController(ArmaRepository armaRepository, JugadorRepository jugadorRepository) {
-        this.armaRepository = armaRepository;
-        this.jugadorRepository = jugadorRepository;
+    public ArmaController(ArmaService armaService) {
+        this.armaService = armaService;
     }
 
     /**
-     * Construcción completa por URL usando constructor principal.
+     * Construcción completa por URL usando constructor principal a través de ArmaService.
      * Ejemplo: GET /armas/crear?nombre=Glock-18&precio=200&dano=28&balas=20
      */
     @GetMapping("/crear")
-    public ResponseEntity<?> crearArma(
+    public ResponseEntity<Map<String, Object>> crearArma(
             @RequestParam String nombre,
             @RequestParam int precio,
             @RequestParam(defaultValue = "AMBOS") String equipo,
@@ -34,141 +37,72 @@ public class ArmaController {
             @RequestParam(defaultValue = "15") int balas,
             @RequestParam(required = false) String imagen,
             @RequestParam(required = false) String sonido) {
-        try {
-            Equipo eq = Equipo.valueOf(equipo.toUpperCase());
-            Pistola nuevaPistola = new Pistola(nombre, precio, eq, dano, 75.0, balas, balas * 3, 2.2, false,
-                    imagen != null ? imagen : "glock18.png",
-                    sonido != null ? sonido : "pistol_shot.wav");
-            
-            Map<String, Object> resp = new LinkedHashMap<>();
-            resp.put("estado", "Instanciada exitosamente (constructor completo)");
-            resp.put("nombre", nuevaPistola.getNombre());
-            resp.put("precio", nuevaPistola.getPrecio());
-            resp.put("equipo", nuevaPistola.getEquipo());
-            resp.put("imagen", nuevaPistola.getImagen());
-            resp.put("sonido", nuevaPistola.getSonido());
-            resp.put("comportamiento", nuevaPistola.ejecutarAccion());
-            return ResponseEntity.ok(resp);
-        } catch (ArmaException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+
+        Pistola nuevaPistola = armaService.instanciarPistolaCompleta(nombre, precio, equipo, dano, balas, imagen, sonido);
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("estado", "Instanciada exitosamente (constructor completo)");
+        resp.put("nombre", nuevaPistola.getNombre());
+        resp.put("precio", nuevaPistola.getPrecio());
+        resp.put("equipo", nuevaPistola.getEquipo());
+        resp.put("imagen", nuevaPistola.getImagen());
+        resp.put("sonido", nuevaPistola.getSonido());
+        resp.put("comportamiento", nuevaPistola.ejecutarAccion());
+        return ResponseEntity.ok(resp);
     }
 
     /**
-     * Construcción por URL usando constructor simple sobrecargado.
+     * Construcción por URL usando constructor simple sobrecargado a través de ArmaService.
      * Ejemplo: GET /armas/crear-simple?nombre=Desert-Eagle&precio=700&dano=53.0
      */
     @GetMapping("/crear-simple")
-    public ResponseEntity<?> crearArmaSimple(
+    public ResponseEntity<Map<String, Object>> crearArmaSimple(
             @RequestParam String nombre,
             @RequestParam int precio,
             @RequestParam double dano) {
-        try {
-            Pistola pistolaSimple = new Pistola(nombre, precio, dano);
-            
-            Map<String, Object> resp = new LinkedHashMap<>();
-            resp.put("estado", "Instanciada exitosamente (constructor sobrecargado simple)");
-            resp.put("nombre", pistolaSimple.getNombre());
-            resp.put("precio", pistolaSimple.getPrecio());
-            resp.put("equipo", pistolaSimple.getEquipo());
-            resp.put("imagen", pistolaSimple.getImagen());
-            resp.put("sonido", pistolaSimple.getSonido());
-            resp.put("comportamiento", pistolaSimple.ejecutarAccion());
-            return ResponseEntity.ok(resp);
-        } catch (ArmaException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+
+        Pistola pistolaSimple = armaService.instanciarPistolaSimple(nombre, precio, dano);
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("estado", "Instanciada exitosamente (constructor sobrecargado simple)");
+        resp.put("nombre", pistolaSimple.getNombre());
+        resp.put("precio", pistolaSimple.getPrecio());
+        resp.put("equipo", pistolaSimple.getEquipo());
+        resp.put("imagen", pistolaSimple.getImagen());
+        resp.put("sonido", pistolaSimple.getSonido());
+        resp.put("comportamiento", pistolaSimple.ejecutarAccion());
+        return ResponseEntity.ok(resp);
     }
 
     /**
      * Endpoint polimórfico (Sobreescritura):
-     * Habla con las clases hijas únicamente a través del tipo padre 'Arma'.
+     * Delega en ArmaService para invocar ejecutarAccion() sobre el tipo padre 'Arma'.
      * Ejemplo: GET /armas/comportamiento
      */
     @GetMapping("/comportamiento")
     public ResponseEntity<List<Map<String, Object>>> obtenerComportamiento() {
-        List<Arma> arsenal = armaRepository.findAll();
-        if (arsenal.isEmpty()) {
-            arsenal = List.of(
-                new Pistola("USP-S", 200, Equipo.COUNTER_TERRORISTA, 35.0, 85.0, 12, 24, 2.2, true),
-                new Granada("Granada Flashbang", 200, Equipo.AMBOS, 0.0, 10.0, 1.5, false, "Ceguera temporal")
-            );
-        }
-
-        List<Map<String, Object>> respuesta = new ArrayList<>();
-        for (Arma arma : arsenal) {
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("id", arma.getId());
-            item.put("arma", arma.getNombre());
-            item.put("tipo", arma.getClass().getSimpleName());
-            item.put("precio", arma.getPrecio());
-            item.put("equipo", arma.getEquipo());
-            item.put("imagen", arma.getImagen());
-            item.put("sonido", arma.getSonido());
-            item.put("resultadoAccion", arma.ejecutarAccion());
-            respuesta.add(item);
-        }
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.ok(armaService.obtenerComportamientoPolimorfico());
     }
 
     /**
      * Endpoint polimórfico demostrando la Sobrecarga de método de dominio:
-     * Invoca ejecutarAccion(repeticiones) sobre el tipo padre 'Arma'.
+     * Delega en ArmaService para invocar ejecutarAccion(repeticiones) sobre el tipo padre 'Arma'.
      * Ejemplo: GET /armas/comportamiento-sobrecargado?repeticiones=3
      */
     @GetMapping("/comportamiento-sobrecargado")
-    public ResponseEntity<?> obtenerComportamientoSobrecargado(
+    public ResponseEntity<List<Map<String, Object>>> obtenerComportamientoSobrecargado(
             @RequestParam(defaultValue = "2") int repeticiones) {
-        try {
-            List<Arma> arsenal = List.of(
-                new Pistola("Glock-18", 200, Equipo.TERRORISTA, 28.0, 75.0, 20, 60, 2.2, false),
-                new Granada("Granada HE", 300, Equipo.AMBOS, 98.0, 8.0, 2.0, true, "Explosión fragmentaria")
-            );
-
-            List<Map<String, Object>> respuesta = new ArrayList<>();
-            for (Arma arma : arsenal) {
-                Map<String, Object> item = new LinkedHashMap<>();
-                item.put("arma", arma.getNombre());
-                item.put("repeticionesOSegundos", repeticiones);
-                item.put("imagen", arma.getImagen());
-                item.put("sonido", arma.getSonido());
-                item.put("resultadoSobrecargado", arma.ejecutarAccion(repeticiones));
-                respuesta.add(item);
-            }
-            return ResponseEntity.ok(respuesta);
-        } catch (ArmaException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        return ResponseEntity.ok(armaService.obtenerComportamientoSobrecargado(repeticiones));
     }
 
     /**
      * Catálogo UI (Consigna 3 - Interfaz del dominio):
-     * Devuelve elementos persistidos de dos familias distintas (Arma y Jugador)
+     * Delega en ArmaService para devolver elementos persistidos de dos familias distintas (Arma y Jugador)
      * utilizando la interfaz común UICapable.
      * Ejemplo: GET /armas/catalogo-ui
      */
     @GetMapping("/catalogo-ui")
     public ResponseEntity<List<Map<String, Object>>> catalogoUI() {
-        List<UICapable> elementosUI = new ArrayList<>();
-        elementosUI.addAll(armaRepository.findAll());
-        elementosUI.addAll(jugadorRepository.findAll());
-
-        List<Map<String, Object>> res = new ArrayList<>();
-        for (UICapable elemento : elementosUI) {
-            Map<String, Object> m = new LinkedHashMap<>();
-            m.put("clase", elemento.getClass().getSimpleName());
-            m.put("jerarquia", (elemento instanceof Arma) ? "Familia Arma" : "Familia Jugador");
-            if (elemento instanceof Arma a) {
-                m.put("id", a.getId());
-                m.put("nombre", a.getNombre());
-            } else if (elemento instanceof Jugador j) {
-                m.put("id", j.getId());
-                m.put("nombre", j.getNombre());
-            }
-            m.put("imagen", elemento.getImagen());
-            m.put("sonido", elemento.getSonido());
-            res.add(m);
-        }
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(armaService.obtenerCatalogoUI());
     }
 }
