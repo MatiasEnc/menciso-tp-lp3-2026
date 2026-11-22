@@ -51,17 +51,25 @@ class ArmaCrudTests {
     }
 
     @Test
-    void testValidacionNombreVacioLanzaExcepcion() {
-        assertThrows(ParametroInvalidoException.class, () -> {
-            new Pistola("   ", 200, 28.0);
-        });
+    void testValidacionNombreVacioLanzaExcepcionEnService() {
+        Pistola invalida = new Pistola("   ", 200, 28.0);
+        assertThrows(ParametroInvalidoException.class, () -> armaService.crear(invalida));
     }
 
     @Test
-    void testValidacionPrecioNegativoLanzaExcepcion() {
-        assertThrows(ParametroInvalidoException.class, () -> {
-            new Pistola("Glock Negativa", -100, 28.0);
-        });
+    void testValidacionPrecioNegativoLanzaExcepcionEnService() {
+        Pistola invalida = new Pistola("Glock Negativa", -100, 28.0);
+        assertThrows(ParametroInvalidoException.class, () -> armaService.crear(invalida));
+    }
+
+    @Test
+    void testValidacionMunicionSuperaCapacidadCargadorLanzaExcepcion() {
+        Pistola invalida = new Pistola("Glock Ilegal", 200, 28.0);
+        invalida.setCapacidadCargador(20);
+        invalida.setMunicionCargador(500);
+
+        assertThrows(ParametroInvalidoException.class, () -> armaService.crear(invalida));
+        assertEquals(0, armaRepository.count());
     }
 
     @Test
@@ -109,6 +117,7 @@ class ArmaCrudTests {
     @Test
     void testExcepcionHijaMunicionInsuficiente() {
         Pistola sinBalas = new Pistola("Glock Vacía", 200, Equipo.TERRORISTA, 28.0, 75.0, 0, 0, 2.2, false);
+        sinBalas.setCapacidadCargador(20);
         Arma guardada = armaService.crear(sinBalas);
 
         assertThrows(MunicionInsuficienteException.class, () -> armaService.dispararArma(guardada.getId(), 1));

@@ -8,6 +8,7 @@ import py.edu.uc.lp3.me.cs2.domain.Blindaje;
 import py.edu.uc.lp3.me.cs2.domain.Equipo;
 import py.edu.uc.lp3.me.cs2.domain.Granada;
 import py.edu.uc.lp3.me.cs2.domain.Jugador;
+import py.edu.uc.lp3.me.cs2.exceptions.ParametroInvalidoException;
 import py.edu.uc.lp3.me.cs2.exceptions.ValidationException;
 import py.edu.uc.lp3.me.cs2.repository.ArmaRepository;
 import py.edu.uc.lp3.me.cs2.repository.JugadorRepository;
@@ -67,6 +68,16 @@ class SimulacionExplosionTests {
     }
 
     @Test
+    void testSimulacionRechazaGranadaIlegalEnJson() {
+        Granada granadaIlegal = new Granada("Granada Ilegal", -300, -5.0);
+        SimulacionExplosionRequest req = new SimulacionExplosionRequest();
+        req.setGranada(granadaIlegal);
+        req.setDistanciaMetros(2.0);
+
+        assertThrows(ParametroInvalidoException.class, () -> simulacionService.simularImpactoPersistido(req));
+    }
+
+    @Test
     void testExplosionSinBlindajeDanioCompleto() {
         Granada granada = new Granada("Granada HE", 300, Equipo.TERRORISTA, 98.0, 8.0, 2.0, true, "Explosión");
         Jugador jugador = new Jugador("CT-SinBlindaje", 100.0, Equipo.COUNTER_TERRORISTA, null);
@@ -93,14 +104,12 @@ class SimulacionExplosionTests {
 
     @Test
     void testExplosionFuegoAmigoReduceDanio() {
-        // Mismo equipo (TERRORISTA)
         Granada granada = new Granada("Granada HE", 300, Equipo.TERRORISTA, 98.0, 8.0, 2.0, true, "Explosión");
         Jugador companiero = new Jugador("T-Amigo", 100.0, Equipo.TERRORISTA, null);
 
         ResultadoSimulacion resultado = simulacionService.simularExplosion(granada, companiero, null, 2.0);
 
         assertTrue(resultado.isFuegoAmigo());
-        // Daño normal 73.5 * 0.35 = 25.73
         assertEquals(25.73, resultado.getDanioFinalVida(), 0.1);
         assertEquals(74.27, resultado.getVidaRestante(), 0.1);
     }
