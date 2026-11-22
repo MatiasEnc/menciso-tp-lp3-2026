@@ -28,4 +28,4 @@ Para el desarrollo del trabajo práctico me apoyé en el asistente de IA para ir
 ---
 
 **Repositorio:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026](https://github.com/MatiasEnc/menciso-tp-lp3-2026)  
-**Commit de la solución:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/cecf2ac9b1c7c197fe160e626e71e0a1dd52ccf0](https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/cecf2ac9b1c7c197fe160e626e71e0a1dd52ccf0)
+**Commit de la solución:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/5b7251369360afe656f563f8e02c080779061eea](https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/5b7251369360afe656f563f8e02c080779061eea)
