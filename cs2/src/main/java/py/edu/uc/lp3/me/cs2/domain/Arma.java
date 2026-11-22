@@ -3,13 +3,13 @@ package py.edu.uc.lp3.me.cs2.domain;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
-import py.edu.uc.lp3.me.cs2.exceptions.ParametroInvalidoException;
 
 import java.time.LocalDateTime;
 
 /**
  * Clase base abstracta que modela cualquier tipo de arma en Counter-Strike 2.
- * Mapeada con estrategia SINGLE_TABLE en H2 y polimorfismo JSON en Jackson.
+ * Guarda únicamente el estado encapsulado de la entidad.
+ * Las validaciones de invariantes y reglas de negocio viven en la capa service.
  */
 @Entity
 @Table(name = "armas")
@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
         @JsonSubTypes.Type(value = Francotirador.class, names = {"Francotirador", "FRANCOTIRADOR", "francotirador"}),
         @JsonSubTypes.Type(value = Escopeta.class, names = {"Escopeta", "ESCOPETA", "escopeta"})
 })
-public abstract class Arma implements UI.Capable, UICapable {
+public abstract class Arma implements UICapable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -79,8 +79,7 @@ public abstract class Arma implements UI.Capable, UICapable {
     }
 
     /**
-     * Constructor protegido sin argumentos requerido exclusivamente por JPA/Jackson.
-     * No es público para preservar el ocultamiento de invariantes en el código de negocio.
+     * Constructor protegido sin argumentos requerido por JPA/Jackson.
      */
     protected Arma() {
         this.equipo = Equipo.AMBOS;
@@ -93,13 +92,7 @@ public abstract class Arma implements UI.Capable, UICapable {
      * Constructor completo con multimedia y descripción.
      */
     public Arma(String nombre, int precio, Equipo equipo, String imagen, String sonido, String descripcion) {
-        if (nombre == null || nombre.isBlank()) {
-            throw new ParametroInvalidoException("El nombre del arma no puede estar vacío");
-        }
-        if (precio < 0) {
-            throw new ParametroInvalidoException("El precio no puede ser negativo");
-        }
-        this.nombre = nombre.trim();
+        this.nombre = (nombre != null) ? nombre.trim() : null;
         this.precio = precio;
         this.equipo = (equipo != null) ? equipo : Equipo.AMBOS;
         this.imagen = (imagen != null && !imagen.isBlank()) ? imagen : "default_weapon.png";
@@ -152,10 +145,7 @@ public abstract class Arma implements UI.Capable, UICapable {
     }
 
     public void setNombre(String nombre) {
-        if (nombre == null || nombre.isBlank()) {
-            throw new ParametroInvalidoException("El nombre del arma no puede estar vacío");
-        }
-        this.nombre = nombre.trim();
+        this.nombre = (nombre != null) ? nombre.trim() : null;
     }
 
     public String getDescripcion() {
@@ -171,9 +161,6 @@ public abstract class Arma implements UI.Capable, UICapable {
     }
 
     public void setPrecio(int precio) {
-        if (precio < 0) {
-            throw new ParametroInvalidoException("El precio no puede ser negativo");
-        }
         this.precio = precio;
     }
 

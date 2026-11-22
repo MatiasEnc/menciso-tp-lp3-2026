@@ -3,7 +3,6 @@ package py.edu.uc.lp3.me.cs2.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import py.edu.uc.lp3.me.cs2.exceptions.ParametroInvalidoException;
 
 @Entity
 @DiscriminatorValue("PISTOLA")
@@ -63,24 +62,26 @@ public class Pistola extends ArmaDeFuego {
 
     /**
      * Sobrecarga de ejecutarAccion permitiendo ráfagas de disparos.
-     * Utiliza los métodos y getters de la clase base ArmaDeFuego para respetar el encapsulamiento.
+     * Utiliza los getters de la clase base ArmaDeFuego para describir la acción polimórfica.
      */
     @Override
     public String ejecutarAccion(int disparos) {
-        if (disparos <= 0) {
-            throw new ParametroInvalidoException("La cantidad de disparos debe ser mayor a cero");
-        }
         if (getMunicionCargador() > 0) {
-            int efectuados = Math.min(disparos, getMunicionCargador());
-            disparar(efectuados);
+            int efectuados = Math.min(Math.max(disparos, 1), getMunicionCargador());
             String modo = esSilenciada ? "Disparo silenciado con sigilo (*Pffft*)" : "Disparo de pistola estándar (¡PUM!)";
-            return String.format("[%s] %s (%d tiro(s)). Daño: %.1f | Balas restantes: %d/%d | Sonido: %s",
+            return String.format("[%s] %s (%d tiro(s)). Daño: %.1f | Balas en cargador: %d/%d | Sonido: %s",
                     getNombre(), modo, efectuados, getDaño(), getMunicionCargador(), getCapacidadCargador(), getSonido());
         } else {
-            return String.format("[%s] *Click* Sin munición en el cargador. ¡Necesita recargar! | Sonido: empty_click.wav", getNombre());
+            return String.format("[%s] *Click* Sin munición en el cargador (0/%d). ¡Necesita recargar! | Sonido: empty_click.wav",
+                    getNombre(), getCapacidadCargador());
         }
     }
 
-    public boolean isEsSilenciada() { return esSilenciada; }
-    public void setEsSilenciada(boolean esSilenciada) { this.esSilenciada = esSilenciada; }
+    public boolean isEsSilenciada() {
+        return esSilenciada;
+    }
+
+    public void setEsSilenciada(boolean esSilenciada) {
+        this.esSilenciada = esSilenciada;
+    }
 }
