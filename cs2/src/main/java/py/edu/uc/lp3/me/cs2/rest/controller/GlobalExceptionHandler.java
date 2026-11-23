@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import py.edu.uc.lp3.me.cs2.exceptions.ArmaException;
 import py.edu.uc.lp3.me.cs2.exceptions.MunicionInsuficienteException;
 import py.edu.uc.lp3.me.cs2.exceptions.ParametroInvalidoException;
+import py.edu.uc.lp3.me.cs2.exceptions.RechazoCompaneroException;
 import py.edu.uc.lp3.me.cs2.exceptions.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
@@ -67,6 +68,30 @@ public class GlobalExceptionHandler {
         body.put("error", "Recurso No Encontrado");
         body.put("mensaje", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    /**
+     * Handler específico para rechazos provenientes de las APIs de los compañeros (A2 o A3) en POO-09.
+     * Atribuye claramente qué compañero rechazó la jugada y confirma que el H2 local quedó sin cambios.
+     */
+    @ExceptionHandler(RechazoCompaneroException.class)
+    public ResponseEntity<Map<String, Object>> handleRechazoCompaneroException(RechazoCompaneroException ex) {
+        int status = (ex.getCodigoHttpCompanero() >= 400 && ex.getCodigoHttpCompanero() < 600)
+                ? ex.getCodigoHttpCompanero()
+                : HttpStatus.UNPROCESSABLE_ENTITY.value();
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", status);
+        body.put("tipoExcepcion", ex.getClass().getSimpleName());
+        body.put("excepcionPadre", "ArmaException");
+        body.put("rolCompanero", ex.getRolCompanero());
+        body.put("rechazadoPor", ex.getRechazadoPor());
+        body.put("urlConsultada", ex.getUrlConsultada());
+        body.put("codigoHttpCompanero", ex.getCodigoHttpCompanero());
+        body.put("estadoH2Local", "SIN_CAMBIOS");
+        body.put("mensaje", ex.getMessage());
+        body.put("detalleCompanero", ex.getDetalleCompanero());
+        return ResponseEntity.status(status).body(body);
     }
 
     /**
