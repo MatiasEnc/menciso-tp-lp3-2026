@@ -1,10 +1,34 @@
 # menciso-tp-lp3-2026
 
 **Asignatura:** Lenguaje de Programación 3 (CYT646) — Edición 2026  
-**Ejercicio:** POO-08 (CRUD REST, H2, reglas de juego, simulación persistida, excepciones e Insomnia)  
+**Ejercicio:** POO-09 (Challenge de APIs cruzadas, OpenAPI y cierre de observaciones de POO-08)  
 **Dominio:** Counter-Strike 2 (CS2)  
 **Autor:** Matias Enciso  
 **Licencia:** [Apache License 2.0](LICENSE)  
+
+---
+
+## 0. Cierre de Observaciones de POO-08 (3 puntos) y OpenAPI Propio
+
+En cumplimiento de la tabla de los 3 puntos de POO-09, a continuación se detalla cada observación recibida en la corrección de POO-08 y cómo quedó cerrada en el código:
+
+| Criterio observado en POO-08 | Observación de la cátedra | Cómo se cerró en esta entrega |
+| :--- | :--- | :--- |
+| **Criterio 2: Organización en paquetes (Separación de 3 capas)** | `ArmaController` inyectaba `ArmaRepository` y `JugadorRepository` directamente, y el `GET` de `SimulacionExplosionController` instanciaba `Granada`, `Blindaje` y `Jugador`. | Se eliminaron los repositorios de `ArmaController` (ahora delega todo en `ArmaService`, incluyendo `obtenerCatalogoUI()` y `obtenerComportamientoPolimorfico()`), y `SimulacionExplosionController` delega la creación y simulación de lectura en `SimulacionExplosionService`. |
+| **Criterio 2: Lógica y excepciones en `service` vs `domain`** | Las entidades de `domain` validaban, aplicaban las reglas y lanzaban excepciones en lugar de guardar solo el estado encapsulado. | Se limpiaron `Arma`, `ArmaDeFuego`, `Pistola`, `Granada`, `Jugador` y `Blindaje` en `domain` para que solo guarden su estado encapsulado (`private`), y se movieron todas las validaciones, las dos reglas de negocio y los `throw` a `ArmaService` y `SimulacionExplosionService`. Además, `GlobalExceptionHandler` se movió a `rest.controller`, y se eliminó la interfaz repetida `UI.java`. |
+| **Criterio 3: Ocultamiento e invariantes (`municionCargador <= capacidadCargador`)** | Un `POST` con `municionCargador: 500` y `capacidadCargador: 20` se guardaba, y la simulación con granada en el JSON no pasaba por `validarArma`. | Se quitó el auto-incremento de `capacidadCargador` del setter y se agregó en `ArmaService.validarArma()` el control estricto `municionCargador <= capacidadCargador` (además de validar daño, precisión, radio y tiempo). En `SimulacionExplosionService` ahora se validan siempre el arma, el jugador y el blindaje tanto por ID como por JSON. |
+| **Criterio 6 y 8: `GET /demo`, propiedades de H2 en README y enlace en Especificaciones** | `GET /demo` modificaba H2, el README listaba `spring.jpa.database-platform` que no estaba en `application.properties`, y el enlace en `ESPECIFICACIONES.md` tenía un hash anterior. | `GET /api/simulacion/explosion/demo` pasó a ser de solo lectura (`@Transactional(readOnly = true)`), la lista de propiedades del README ahora coincide línea por línea con `application.properties`, se unificó la explicación de `PUT` y se sincronizó el hash del commit en `ESPECIFICACIONES.md`. |
+
+### Documento OpenAPI 3.0.3 Propio
+* **JSON OpenAPI (para importar directo en Insomnia o consultar desde clientes HTTP):**  
+  `GET http://localhost:8080/v3/api-docs`
+* **Visor interactivo Swagger UI en navegador:**  
+  `GET http://localhost:8080/swagger-ui.html`
+* **Operaciones documentadas para el grupo:**
+  1. `POST /api/simulacion/explosion` y `GET /api/simulacion/explosion?distancia=2.5&conBlindaje=true&fuegoAmigo=false` (Simulación que combina Regla 1 y Regla 2; devuelve `200`, `400 ParametroInvalidoException`, `404 ResourceNotFoundException` o `409 MunicionInsuficienteException`).
+  2. `POST /api/armas/{id}/disparar?balas=1` (Regla 1: consumo de munición/carga en H2; devuelve `200`, `400` o `409`).
+  3. `POST /api/armas/{id}/recargar` (Regla de recarga desde reserva hasta `capacidadCargador`; devuelve `200` o `409`).
+  4. `GET /api/armas`, `POST /api/armas`, `GET /api/armas/{id}`, `PUT /api/armas/{id}`, `DELETE /api/armas/{id}` (CRUD completo con validación de `municionCargador <= capacidadCargador`).
 
 ---
 
@@ -278,4 +302,4 @@ La colección exportada se encuentra versionada en:
 
 ## 6. Enlace al Commit de la Solución
 * **Repositorio:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026](https://github.com/MatiasEnc/menciso-tp-lp3-2026)
-* **Commit de la solución:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/5b7251369360afe656f563f8e02c080779061eea](https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/5b7251369360afe656f563f8e02c080779061eea)
+* **Commit de la solución:** [https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/5862738538f692bf800b326f28d38c494b106a9c](https://github.com/MatiasEnc/menciso-tp-lp3-2026/commit/5862738538f692bf800b326f28d38c494b106a9c)
