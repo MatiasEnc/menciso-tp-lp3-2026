@@ -1,32 +1,36 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2026-10-28T23:30:00.000Z",
+  "__export_date": "2026-11-23T14:00:00.000Z",
   "__export_source": "insomnia.desktop.app:v10.0.0",
   "resources": [
     {
       "_id": "wrk_scratchpad",
       "_type": "workspace",
       "parentId": null,
-      "modified": 1793209876072,
+      "modified": 1795400000000,
       "created": 1793209876072,
-      "name": "me-taller-lp3 - CS2 API",
-      "description": "Colección de Insomnia para POO-08 (CRUD H2, Interfaz UICapable, Simulación Persistida y Excepciones de Dominio en CS2)",
+      "name": "me-taller-lp3 - CS2 API (POO-09 y Cierre POO-08)",
+      "description": "Colección de Insomnia para POO-09 (OpenAPI, Escenario Cruzado A1 Matias Enciso -> A2 Diana Aquino y A3 Fabricio Gonzalez, y CRUD/Simulación POO-08)",
       "scope": "collection"
     },
     {
       "_id": "env_99d30891da4bdcebc63947a8fc17f076de878684",
       "_type": "environment",
       "parentId": "wrk_scratchpad",
-      "modified": 1793295000000,
+      "modified": 1795400000000,
       "created": 1793210005721,
-      "name": "Base Environment",
+      "name": "Base Environment (A1:8080, A2:8081, A3:8082)",
       "data": {
-        "base_url": "http://localhost:8080"
+        "base_url": "http://localhost:8080",
+        "a2_diana_url": "http://localhost:8081",
+        "a3_fabricio_url": "http://localhost:8082"
       },
       "dataPropertyOrder": {
         "&": [
-          "base_url"
+          "base_url",
+          "a2_diana_url",
+          "a3_fabricio_url"
         ]
       },
       "color": null,
@@ -34,24 +38,128 @@
       "metaSortKey": 1793210005721
     },
     {
-      "_id": "fld_65ed3118d9de415eb7ae5e4490c22a64",
+      "_id": "fld_poo09_escenario",
       "_type": "request_group",
       "parentId": "wrk_scratchpad",
-      "modified": 1793292020506,
-      "created": 1793291926188,
-      "name": "me-taller-lp3",
-      "description": "Repositorio del taller LP3 - Matias Enciso",
+      "modified": 1795400000000,
+      "created": 1795400000000,
+      "name": "1. POO-09 — OpenAPI y Escenario Cruzado (A1 -> A2 Diana y A3 Fabricio)",
+      "description": "Pedidos del Challenge de APIs cruzadas POO-09: OpenAPI propio, Escenario Feliz (201), Verificación en H2 (GET), Rechazo de A2 Diana Aquino (422) y Rechazo de A3 Fabricio Gonzalez (409).",
       "environment": {},
-      "metaSortKey": -1793291926188
+      "metaSortKey": -1795400000000
+    },
+    {
+      "_id": "req_poo09_01_openapi_a1",
+      "_type": "request",
+      "parentId": "fld_poo09_escenario",
+      "modified": 1795400001000,
+      "created": 1795400001000,
+      "url": "{{ _.base_url }}/v3/api-docs",
+      "name": "01. OpenAPI Propio A1 - Matias Enciso (GET /v3/api-docs)",
+      "description": "Devuelve el documento OpenAPI 3.0.3 completo de A1 (Matias Enciso) con el CRUD, las 2 reglas de juego, la simulación y el escenario cruzado.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1795400000010
+    },
+    {
+      "_id": "req_poo09_02_escenario_feliz",
+      "_type": "request",
+      "parentId": "fld_poo09_escenario",
+      "modified": 1795400002000,
+      "created": 1795400002000,
+      "url": "{{ _.base_url }}/api/escenario/jugadas",
+      "name": "02. Escenario Cruzado - Camino Feliz (201 Created, A2 y A3 aceptan y persiste en H2)",
+      "description": "Consulta primero la Regla 2 de A2 (Diana Aquino: POST /api/armas/granadas/simular con Counter-Terrorista vs Terrorista a 2.0m -> 200 OK) y luego la Regla 1 de A3 (Fabricio Gonzalez: POST /api/reglas/municion con cargador=20 y disparos=3 -> 200 OK). Como ambas APIs aceptan, A1 persiste la JugadaEscenario en su H2.\n\nRespuesta de ejemplo (201 Created):\n{\n  \"id\": 1,\n  \"nombreEscenario\": \"Asalto Táctico Coordinado CS2 (Granada A2 + Ráfaga A3)\",\n  \"armaId\": 1,\n  \"armaNombre\": \"Glock-18\",\n  \"jugadorObjetivoId\": 1,\n  \"jugadorObjetivoNombre\": \"s1mple (CT)\",\n  \"equipoAtacante\": \"Counter-Terrorista\",\n  \"equipoObjetivo\": \"Terrorista\",\n  \"distanciaExplosion\": 2.0,\n  \"cargadorAntes\": 20,\n  \"disparosRafaga\": 3,\n  \"cargadorDespues\": 17,\n  \"vidaAntes\": 100.0,\n  \"vidaDespues\": 79.0,\n  \"durabilidadBlindajeDespues\": 79.0,\n  \"validacionA2Diana\": \"{\\\"estado\\\":\\\"EXPLOSION_VALIDA\\\",\\\"danioFinal\\\":42.25}\",\n  \"validacionA3Fabricio\": \"{\\\"permitido\\\":true,\\\"cargadorAntes\\\":20,\\\"balasNecesarias\\\":3,\\\"cargadorDespues\\\":17}\",\n  \"estadoJugada\": \"APROBADA_POR_A2_Y_A3_PERSISTIDA_EN_H2\"\n}",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"armaId\": 1,\n\t\"jugadorObjetivoId\": 1,\n\t\"equipoAtacante\": \"Counter-Terrorista\",\n\t\"equipoObjetivo\": \"Terrorista\",\n\t\"distanciaExplosion\": 2.0,\n\t\"cargadorDisponible\": 20,\n\t\"disparosRafaga\": 3\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1795400000009
+    },
+    {
+      "_id": "req_poo09_03_verificar_h2",
+      "_type": "request",
+      "parentId": "fld_poo09_escenario",
+      "modified": 1795400003000,
+      "created": 1795400003000,
+      "url": "{{ _.base_url }}/api/escenario/jugadas",
+      "name": "03. Verificar Jugadas Persistidas en H2 de A1 (GET /api/escenario/jugadas)",
+      "description": "Muestra las jugadas del escenario cruzado guardadas en la tabla jugadas_escenario de H2. Solo crecen cuando tanto A2 como A3 aceptan.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1795400000008
+    },
+    {
+      "_id": "req_poo09_04_rechazo_a2_diana",
+      "_type": "request",
+      "parentId": "fld_poo09_escenario",
+      "modified": 1795400004000,
+      "created": 1795400004000,
+      "url": "{{ _.base_url }}/api/escenario/jugadas",
+      "name": "04. Rechazo de A2 - Diana Aquino por Fuego Amigo (422 Unprocessable Entity, H2 sin cambios)",
+      "description": "Envía equipoAtacante='Terrorista' y equipoObjetivo='Terrorista'. La API de A2 (Diana Aquino) rechaza con HTTP 422 (FuegoAmigoException). A1 aborta la jugada, no llama a A3, deja su H2 intacto y atribuye el rechazo a A2 (Diana Aquino).\n\nRespuesta de ejemplo (422 Unprocessable Entity):\n{\n  \"status\": 422,\n  \"tipoExcepcion\": \"RechazoCompaneroException\",\n  \"excepcionPadre\": \"ArmaException\",\n  \"rolCompanero\": \"A2\",\n  \"rechazadoPor\": \"A2 (Diana Aquino)\",\n  \"urlConsultada\": \"http://localhost:8081/api/armas/granadas/simular?equipoAtacante=Terrorista&equipoObjetivo=Terrorista&distancia=2.0\",\n  \"codigoHttpCompanero\": 422,\n  \"estadoH2Local\": \"SIN_CAMBIOS\",\n  \"mensaje\": \"Rechazo de A2 (Diana Aquino): la regla de explosión de granada y fuego amigo rechazó la jugada (HTTP 422).\"\n}",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"armaId\": 1,\n\t\"jugadorObjetivoId\": 1,\n\t\"equipoAtacante\": \"Terrorista\",\n\t\"equipoObjetivo\": \"Terrorista\",\n\t\"distanciaExplosion\": 2.0,\n\t\"cargadorDisponible\": 20,\n\t\"disparosRafaga\": 3\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1795400000007
+    },
+    {
+      "_id": "req_poo09_05_rechazo_a3_fabricio",
+      "_type": "request",
+      "parentId": "fld_poo09_escenario",
+      "modified": 1795400005000,
+      "created": 1795400005000,
+      "url": "{{ _.base_url }}/api/escenario/jugadas",
+      "name": "05. Rechazo de A3 - Fabricio Gonzalez por SIN_MUNICION (409 Conflict, H2 sin cambios)",
+      "description": "A2 (Diana Aquino) aprueba la explosión inicial (200 OK), pero se pide una ráfaga de disparosRafaga=25 con solo cargadorDisponible=5. La API de A3 (Fabricio Gonzalez: POST /api/reglas/municion) rechaza con HTTP 409 (SIN_MUNICION). A1 aborta la transacción, deja su H2 igual que antes y atribuye el rechazo a A3 (Fabricio Gonzalez).\n\nRespuesta de ejemplo (409 Conflict):\n{\n  \"status\": 409,\n  \"tipoExcepcion\": \"RechazoCompaneroException\",\n  \"excepcionPadre\": \"ArmaException\",\n  \"rolCompanero\": \"A3\",\n  \"rechazadoPor\": \"A3 (Fabricio Gonzalez)\",\n  \"urlConsultada\": \"http://localhost:8082/api/reglas/municion\",\n  \"codigoHttpCompanero\": 409,\n  \"estadoH2Local\": \"SIN_CAMBIOS\",\n  \"mensaje\": \"Rechazo de A3 (Fabricio Gonzalez): la regla de munición rechazó la ráfaga de disparos (HTTP 409).\"\n}",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"armaId\": 1,\n\t\"jugadorObjetivoId\": 1,\n\t\"equipoAtacante\": \"Counter-Terrorista\",\n\t\"equipoObjetivo\": \"Terrorista\",\n\t\"distanciaExplosion\": 2.0,\n\t\"cargadorDisponible\": 5,\n\t\"disparosRafaga\": 25\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1795400000006
     },
     {
       "_id": "fld_f464e1e1283a4f669538f79804447d26",
       "_type": "request_group",
-      "parentId": "fld_65ed3118d9de415eb7ae5e4490c22a64",
+      "parentId": "wrk_scratchpad",
       "modified": 1793294289945,
       "created": 1793294289945,
-      "name": "cs2",
-      "description": "Pedidos del servicio Counter-Strike 2",
+      "name": "2. POO-08 — CRUD H2, Invariantes, Interfaz UICapable, Simulación y Excepciones",
+      "description": "Pedidos del servicio propio Counter-Strike 2 (con todas las observaciones de POO-08 cerradas).",
       "environment": {},
       "metaSortKey": -1793294289945
     },
@@ -63,11 +171,11 @@
       "created": 1793294514861,
       "url": "{{ _.base_url }}/api/armas",
       "name": "1. Crear armas (POST)",
-      "description": "Crea una nueva arma de la familia Arma (por ejemplo Pistola o Granada) y la persiste en H2.",
+      "description": "Crea una nueva arma de la familia Arma (Pistola) validando invariantes en ArmaService y la persiste en H2.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n\t\"tipo\": \"Pistola\",\n\t\"nombre\": \"Five-SeveN\",\n\t\"descripcion\": \"Pistola semiautomática con alta penetración de blindaje\",\n\t\"precio\": 500,\n\t\"equipo\": \"COUNTER_TERRORISTA\",\n\t\"daño\": 32.0,\n\t\"precision\": 82.0,\n\t\"municionCargador\": 20,\n\t\"municionReserva\": 100,\n\t\"esSilenciada\": false,\n\t\"activo\": true\n}"
+        "text": "{\n\t\"tipo\": \"Pistola\",\n\t\"nombre\": \"Five-SeveN\",\n\t\"descripcion\": \"Pistola semiautomática con alta penetración de blindaje\",\n\t\"precio\": 500,\n\t\"equipo\": \"COUNTER_TERRORISTA\",\n\t\"daño\": 32.0,\n\t\"precision\": 82.0,\n\t\"municionCargador\": 20,\n\t\"capacidadCargador\": 20,\n\t\"municionReserva\": 100,\n\t\"esSilenciada\": false,\n\t\"activo\": true\n}"
       },
       "parameters": [],
       "headers": [
@@ -77,14 +185,7 @@
         }
       ],
       "authentication": {},
-      "metaSortKey": -1793295000010,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000010
     },
     {
       "_id": "req_fe9c9f6809f74c62bbbf0eddb371014f",
@@ -94,20 +195,13 @@
       "created": 1793294398164,
       "url": "{{ _.base_url }}/api/armas",
       "name": "2. Obtener todas las armas (GET)",
-      "description": "Lista todas las armas persistidas en H2 discriminando su subclase (Pistola, Granada, RifleAsalto).",
+      "description": "Lista todas las armas persistidas en H2 discriminando su subclase.",
       "method": "GET",
       "body": {},
       "parameters": [],
       "headers": [],
       "authentication": {},
-      "metaSortKey": -1793295000009,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000009
     },
     {
       "_id": "req_9900d44e90344541aeaa413c517b3c88",
@@ -123,14 +217,7 @@
       "parameters": [],
       "headers": [],
       "authentication": {},
-      "metaSortKey": -1793295000008,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000008
     },
     {
       "_id": "req_c614eb23afac46bdb9d197de5854ca75",
@@ -144,7 +231,7 @@
       "method": "PUT",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n\t\"tipo\": \"Pistola\",\n\t\"nombre\": \"Glock-18 Water Elemental\",\n\t\"descripcion\": \"Edición especial\",\n\t\"precio\": 350,\n\t\"equipo\": \"TERRORISTA\",\n\t\"daño\": 30.0,\n\t\"precision\": 78.0,\n\t\"municionCargador\": 20,\n\t\"municionReserva\": 120,\n\t\"activo\": true\n}"
+        "text": "{\n\t\"tipo\": \"Pistola\",\n\t\"nombre\": \"Glock-18 Water Elemental\",\n\t\"descripcion\": \"Edición especial\",\n\t\"precio\": 350,\n\t\"equipo\": \"TERRORISTA\",\n\t\"daño\": 30.0,\n\t\"precision\": 78.0,\n\t\"municionCargador\": 20,\n\t\"capacidadCargador\": 20,\n\t\"municionReserva\": 120,\n\t\"activo\": true\n}"
       },
       "parameters": [],
       "headers": [
@@ -154,14 +241,7 @@
         }
       ],
       "authentication": {},
-      "metaSortKey": -1793295000007,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000007
     },
     {
       "_id": "req_13ec3e2b34c94d6b8d1ba3393fa9680f",
@@ -177,14 +257,7 @@
       "parameters": [],
       "headers": [],
       "authentication": {},
-      "metaSortKey": -1793295000006,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000006
     },
     {
       "_id": "req_a1b2c3d4e5f647899001122334455661",
@@ -193,12 +266,12 @@
       "modified": 1793295006000,
       "created": 1793295006000,
       "url": "{{ _.base_url }}/api/armas",
-      "name": "6. POST ilegal - Precio negativo (400)",
-      "description": "Intenta crear un arma con precio negativo (-500). Es rechazado por el invariante de dominio y no persiste basura en H2.",
+      "name": "6. POST ilegal - Munición supera capacidadCargador (400)",
+      "description": "Intenta crear una Pistola con municionCargador=500 y capacidadCargador=20. Es rechazado por ArmaService con HTTP 400 (ParametroInvalidoException) y no persiste basura en H2.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n\t\"tipo\": \"Pistola\",\n\t\"nombre\": \"Arma Ilegal\",\n\t\"descripcion\": \"No debe guardarse en H2\",\n\t\"precio\": -500,\n\t\"equipo\": \"TERRORISTA\"\n}"
+        "text": "{\n\t\"tipo\": \"Pistola\",\n\t\"nombre\": \"Glock Cargador Ilegal\",\n\t\"descripcion\": \"No debe guardarse en H2\",\n\t\"precio\": 200,\n\t\"municionCargador\": 500,\n\t\"capacidadCargador\": 20,\n\t\"equipo\": \"TERRORISTA\"\n}"
       },
       "parameters": [],
       "headers": [
@@ -208,14 +281,7 @@
         }
       ],
       "authentication": {},
-      "metaSortKey": -1793295000005,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000005
     },
     {
       "_id": "req_a1b2c3d4e5f647899001122334455662",
@@ -225,20 +291,13 @@
       "created": 1793295007000,
       "url": "{{ _.base_url }}/api/armas/999",
       "name": "7. Obtener id inexistente (404)",
-      "description": "Consulta un ID que no existe en H2 (999) y recibe 404 Not Found manejado por GlobalExceptionHandler.",
+      "description": "Consulta un ID que no existe en H2 (999) y recibe 404 Not Found.",
       "method": "GET",
       "body": {},
       "parameters": [],
       "headers": [],
       "authentication": {},
-      "metaSortKey": -1793295000004,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000004
     },
     {
       "_id": "req_a1b2c3d4e5f647899001122334455663",
@@ -248,20 +307,13 @@
       "created": 1793295008000,
       "url": "{{ _.base_url }}/armas/catalogo-ui",
       "name": "8. Endpoint Interfaz UICapable (GET)",
-      "description": "Devuelve elementos persistidos de dos familias distintas (Arma y Jugador) a través de la interfaz de dominio UICapable.",
+      "description": "Devuelve elementos persistidos de dos familias distintas (Arma y Jugador) a través de ArmaService usando la interfaz UICapable.",
       "method": "GET",
       "body": {},
       "parameters": [],
       "headers": [],
       "authentication": {},
-      "metaSortKey": -1793295000003,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000003
     },
     {
       "_id": "req_a1b2c3d4e5f647899001122334455664",
@@ -271,7 +323,7 @@
       "created": 1793295009000,
       "url": "{{ _.base_url }}/api/simulacion/explosion",
       "name": "9. Simulación Persistida en H2 (POST)",
-      "description": "Ejecuta las 2 reglas de negocio (detonación/consumo de munición y mitigación por blindaje Kevlar) sobre entidades en H2 y persiste el resultado.",
+      "description": "Ejecuta las 2 reglas de negocio sobre entidades en H2 y persiste el resultado.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
@@ -285,14 +337,7 @@
         }
       ],
       "authentication": {},
-      "metaSortKey": -1793295000002,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000002
     },
     {
       "_id": "req_a1b2c3d4e5f647899001122334455665",
@@ -302,20 +347,13 @@
       "created": 1793295010000,
       "url": "{{ _.base_url }}/api/simulacion/explosion/jugadores/1",
       "name": "10. Verificar Jugador en H2 tras Simulación (GET)",
-      "description": "Permite comprobar con un GET posterior que la vida del jugador y la durabilidad de su blindaje quedaron persistidas en H2 tras la simulación.",
+      "description": "Permite comprobar con un GET posterior que la vida del jugador y la durabilidad de su blindaje quedaron persistidas en H2.",
       "method": "GET",
       "body": {},
       "parameters": [],
       "headers": [],
       "authentication": {},
-      "metaSortKey": -1793295000001,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000001
     },
     {
       "_id": "req_a1b2c3d4e5f647899001122334455666",
@@ -331,14 +369,7 @@
       "parameters": [],
       "headers": [],
       "authentication": {},
-      "metaSortKey": -1793295000000,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793295000000
     },
     {
       "_id": "req_a1b2c3d4e5f647899001122334455667",
@@ -348,20 +379,13 @@
       "created": 1793295012000,
       "url": "{{ _.base_url }}/api/armas/3/recargar",
       "name": "12. Excepción Hija 2 - MunicionInsuficienteException (409)",
-      "description": "Intenta recargar una Granada (o volver a detonar la Granada ID 3 ya detonada), provocando MunicionInsuficienteException (HTTP 409 Conflict).",
+      "description": "Intenta recargar una Granada, provocando MunicionInsuficienteException (HTTP 409 Conflict).",
       "method": "POST",
       "body": {},
       "parameters": [],
       "headers": [],
       "authentication": {},
-      "metaSortKey": -1793294999999,
-      "isPrivate": false,
-      "settingStoreCookies": true,
-      "settingSendCookies": true,
-      "settingDisableRenderRequestBody": false,
-      "settingEncodeUrl": true,
-      "settingRebuildPath": true,
-      "settingFollowRedirects": "global"
+      "metaSortKey": -1793294999999
     }
   ]
 }
