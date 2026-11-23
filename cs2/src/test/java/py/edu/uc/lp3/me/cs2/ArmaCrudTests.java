@@ -14,9 +14,11 @@ import py.edu.uc.lp3.me.cs2.exceptions.ParametroInvalidoException;
 import py.edu.uc.lp3.me.cs2.exceptions.ResourceNotFoundException;
 import py.edu.uc.lp3.me.cs2.exceptions.ValidationException;
 import py.edu.uc.lp3.me.cs2.repository.ArmaRepository;
+import py.edu.uc.lp3.me.cs2.rest.controller.OpenApiController;
 import py.edu.uc.lp3.me.cs2.service.ArmaService;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,6 +31,9 @@ class ArmaCrudTests {
 
     @Autowired
     private ArmaRepository armaRepository;
+
+    @Autowired
+    private OpenApiController openApiController;
 
     @BeforeEach
     void setUp() {
@@ -121,5 +126,19 @@ class ArmaCrudTests {
         Arma guardada = armaService.crear(sinBalas);
 
         assertThrows(MunicionInsuficienteException.class, () -> armaService.dispararArma(guardada.getId(), 1));
+    }
+
+    @Test
+    void testOpenApiDocumentaReglasSimulacionYCrud() {
+        Map<String, Object> doc = openApiController.obtenerOpenApi().getBody();
+        assertNotNull(doc);
+        assertEquals("3.0.3", doc.get("openapi"));
+        assertTrue(doc.containsKey("paths"));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> paths = (Map<String, Object>) doc.get("paths");
+        assertTrue(paths.containsKey("/api/simulacion/explosion"));
+        assertTrue(paths.containsKey("/api/armas/{id}/disparar"));
+        assertTrue(paths.containsKey("/api/armas/{id}/recargar"));
+        assertTrue(paths.containsKey("/api/armas"));
     }
 }

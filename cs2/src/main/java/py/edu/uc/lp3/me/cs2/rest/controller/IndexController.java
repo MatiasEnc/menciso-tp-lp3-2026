@@ -15,6 +15,8 @@ public class IndexController {
         respuesta.put("autor", "Matias Enciso");
         respuesta.put("dominio", "CS2");
         respuesta.put("estado", "API funcionando");
+        respuesta.put("openapi", "/v3/api-docs");
+        respuesta.put("swaggerUi", "/swagger-ui.html");
         return respuesta;
     }
 }
