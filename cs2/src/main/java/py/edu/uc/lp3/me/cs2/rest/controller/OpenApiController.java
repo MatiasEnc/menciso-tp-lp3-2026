@@ -43,12 +43,35 @@ public class OpenApiController {
         ));
 
         doc.put("tags", List.of(
+                Map.of("name", "0. Escenario Cruzado POO-09 (A1 -> A2 y A3)", "description", "Endpoint de escenario que consulta las APIs de A2 (Diana Aquino) y A3 (Fabricio Gonzalez) y persiste en H2 solo si ambas aprueban."),
                 Map.of("name", "1. Reglas de Juego y Simulación", "description", "Endpoints que ejecutan las dos reglas de negocio de CS2 y la simulación persistida en H2."),
                 Map.of("name", "2. CRUD de Armas", "description", "Operaciones CRUD sobre la familia Arma con validación de invariantes en ArmaService."),
                 Map.of("name", "3. Interfaz UICapable y Polimorfismo", "description", "Endpoints que exponen la interfaz de dominio UICapable y sobreescritura/sobrecarga.")
         ));
 
         Map<String, Object> paths = new LinkedHashMap<>();
+
+        // 0. POST y GET /api/escenario/jugadas (POO-09)
+        paths.put("/api/escenario/jugadas", Map.of(
+                "post", Map.of(
+                        "tags", List.of("0. Escenario Cruzado POO-09 (A1 -> A2 y A3)"),
+                        "summary", "Ejecuta el escenario cruzado 'Asalto Táctico Coordinado CS2' consultando a A2 (Diana Aquino) y A3 (Fabricio Gonzalez)",
+                        "operationId", "ejecutarEscenarioCruzado",
+                        "description", "Orquesta la jugada consultando primero la Regla 2 de A2 (Diana Aquino: POST /api/armas/granadas/simular para validar explosión de apertura sin fuego amigo) y luego la Regla 1 de A3 (Fabricio Gonzalez: POST /api/reglas/municion para validar que el cargador alcanza para la ráfaga de remate). Solo si A2 y A3 responden 200 OK se actualiza el H2 local de A1 y se guarda la JugadaEscenario (201 Created). Si alguno rechaza, la base H2 queda sin cambios y se informa quién rechazó.",
+                        "responses", Map.of(
+                                "201", Map.of("description", "Jugada aprobada por A2 y A3 y persistida en el H2 de A1."),
+                                "400", Map.of("description", "Rechazo de A2 o A3 por parámetro fuera de rango (ej. distancia < 0)."),
+                                "409", Map.of("description", "Rechazo de A3 (Fabricio Gonzalez - SIN_MUNICION): el cargador no alcanza para los disparos."),
+                                "422", Map.of("description", "Rechazo de A2 (Diana Aquino - FuegoAmigoException): equipoAtacante y equipoObjetivo son iguales.")
+                        )
+                ),
+                "get", Map.of(
+                        "tags", List.of("0. Escenario Cruzado POO-09 (A1 -> A2 y A3)"),
+                        "summary", "Lista todas las jugadas del escenario cruzado persistidas en el H2 de A1",
+                        "operationId", "listarJugadasEscenario",
+                        "responses", Map.of("200", Map.of("description", "Listado de jugadas persistidas en H2."))
+                )
+        ));
 
         // 1. POST /api/simulacion/explosion
         paths.put("/api/simulacion/explosion", Map.of(
@@ -323,7 +346,7 @@ public class OpenApiController {
         return ResponseEntity.ok(doc);
     }
 
-    @GetMapping(value = "/swagger-ui.html", produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value = {"/swagger-ui.html", "/swagger-ui/index.html"}, produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> swaggerUi() {
         String html = """
                 <!DOCTYPE html>
